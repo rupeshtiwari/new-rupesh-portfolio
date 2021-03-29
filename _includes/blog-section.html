@@ -1,36 +1,56 @@
 <!-- blog -->
 <section class="section">
   <div class="container">
-    <div class="row">
+    <div class="row" id="blogs">
       <div class="col-12 text-center">
         <h2 class="section-title">Blogs</h2>
       </div>
-      <div id="blogs">
+
       <script>
         fetch("https://www.rupeshtiwari.com/blog/feed.xml")
           .then(response => response.text())
           .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
           .then(data => {
-             
+
             console.log(data);
-            const items = data.querySelectorAll("entry");
+            const items = [].slice.call(data.querySelectorAll("entry"), 0, 3);
             let html = ``;
+            let post = ``;
             items.forEach(el => {
+              const imgs = el.getElementsByTagNameNS("http://search.yahoo.com/mrss/", "content");
+
+              const summary = el.querySelector("summary");
+              const content = el.querySelector("content");
+              const excerpt = summary.innerHTML.length > 50 ? summary.innerHTML.split(" ").splice(0, 30).join(" ") : summary.innerHTML;
+
+              post = {
+                url: el.querySelector("link").getAttribute("href"),
+                image: imgs.length ? imgs[0].getAttribute("url") : 'https://i.imgur.com/Wh9VbI4.png',
+                title: el.querySelector("title").innerHTML,
+                excerpt: excerpt,
+              };
+
               html += `
-      <article>
-        <img src="${el.querySelector(" link").innerHTML}/image/large.png" alt="">
-        <h2>
-          <a href="${el.querySelector(" link").innerHTML}" target="_blank" rel="noopener">
-            ${el.querySelector("title").innerHTML}
-          </a>
-        </h2>
-      </article>
-      `;
+                  <div class="col-lg-4 col-sm-6 mb-4">
+                    <article class="card shadow">
+                      <img class="rounded card-img-top" src="${post.image}" alt="${post.title}">
+                      <div class="card-body">
+                        <h4 class="card-title">
+                          <a class="text-dark" href="${post.url}">${post.title}</a>
+                        </h4>
+                        <p class="card-text">${post.excerpt}</p>
+                        <a href="${post.url}" class="btn btn-xs btn-primary">Read More</a>
+                      </div>
+                    </article>
+                  </div>
+                  `;
             });
-             $("#blogs").html(html);
+
+            $("#blogs").html(html);
+
           });
       </script>
-      </div>
+
     </div>
   </div>
 </section>
